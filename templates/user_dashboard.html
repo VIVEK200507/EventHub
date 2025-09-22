@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-5 fw-bold">Welcome back, {{ current_user.first_name }}!</h1>
+                    <p class="text-muted">Here's an overview of your event activities</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('events') }}" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Browse Events
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Stats -->
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-check fa-2x mb-3"></i>
+                    <h4>{{ registrations|length }}</h4>
+                    <p class="mb-0">Events Registered</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-alt fa-2x mb-3"></i>
+                    <h4>{{ registrations|selectattr('event.date', 'ge', today_date)|list|length }}</h4>
+                    <p class="mb-0">Upcoming Events</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-history fa-2x mb-3"></i>
+                    <h4>{{ registrations|selectattr('event.date', 'lt', today_date)|list|length }}</h4>
+                    <p class="mb-0">Past Events</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Registered Events -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>Your Registered Events
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if registrations %}
+                        <div class="row">
+                            {% for registration in registrations %}
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div>
+                                                    <span class="badge bg-{{ 'success' if registration.event.date >= today_date else 'secondary' }}">
+                                                        {{ 'Upcoming' if registration.event.date >= today_date else 'Past' }}
+                                                    </span>
+                                                    {% if registration.is_approved %}
+                                                        {% if registration.qr_code %}
+                                                            <span class="badge bg-success">QR Pass Ready</span>
+                                                        {% else %}
+                                                            <span class="badge bg-info">Approved</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="badge bg-warning">Awaiting Approval</span>
+                                                    {% endif %}
+                                                </div>
+                                                <small class="text-muted">{{ registration.event.date.strftime('%b %d, %Y') }}</small>
+                                            </div>
+                                            
+                                            <h6 class="card-title">{{ registration.event.title }}</h6>
+                                            <p class="card-text text-muted small">{{ registration.event.description[:100] }}{% if registration.event.description|length > 100 %}...{% endif %}</p>
+                                            
+                                            <div class="event-details mb-3">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <i class="fas fa-map-marker-alt text-muted me-2 small"></i>
+                                                    <small class="text-muted">{{ registration.event.location }}</small>
+                                                </div>
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <i class="fas fa-clock text-muted me-2 small"></i>
+                                                    <small class="text-muted">{{ registration.event.time.strftime('%I:%M %p') }}</small>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-tag text-muted me-2 small"></i>
+                                                    <small class="text-muted">{{ registration.event.category }}</small>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="h6 text-primary mb-0">
+                                                    {% if registration.event.price > 0 %}
+                                                        ${{ "%.2f"|format(registration.event.price) }}
+                                                    {% else %}
+                                                        Free
+                                                    {% endif %}
+                                                </span>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('event_detail', event_id=registration.event.id) }}" 
+                                                       class="btn btn-outline-primary">View</a>
+                                                    {% if registration.is_approved and registration.qr_code %}
+                                                        <a href="{{ url_for('view_qr_code', registration_id=registration.id) }}" 
+                                                           class="btn btn-outline-info" title="View QR Code">
+                                                            <i class="fas fa-qrcode"></i>
+                                                        </a>
+                                                    {% else %}
+                                                        <button class="btn btn-outline-secondary" disabled title="{% if not registration.is_approved %}Registration Pending Approval{% else %}QR Pass Not Generated{% endif %}">
+                                                            <i class="fas fa-clock"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                    {% if registration.event.date >= today_date %}
+                                                        <a href="{{ url_for('cancel_registration', event_id=registration.event.id) }}" 
+                                                           class="btn btn-outline-danger"
+                                                           onclick="return confirm('Are you sure you want to cancel your registration?')">Cancel</a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No events registered yet</h5>
+                            <p class="text-muted">Start exploring and register for events that interest you!</p>
+                            <a href="{{ url_for('events') }}" class="btn btn-primary">Browse Events</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

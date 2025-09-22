@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}QR Code Scanner - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-6 fw-bold">QR Code Scanner</h1>
+                    <p class="text-muted">Scan QR codes to check in attendees</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Event Selection -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-calendar-alt me-2"></i>Select Event to Scan
+                    </h5>
+                    {% if events %}
+                        <div class="row">
+                            {% for event in events %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ event.title }}</h6>
+                                            <p class="card-text text-muted small">
+                                                <i class="fas fa-calendar me-1"></i>
+                                                {{ event.date.strftime('%b %d, %Y') }} at {{ event.time.strftime('%I:%M %p') }}
+                                            </p>
+                                            <p class="card-text text-muted small">
+                                                <i class="fas fa-map-marker-alt me-1"></i>
+                                                {{ event.location }}
+                                            </p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    {{ event.registrations|length }} / {{ event.max_attendees }} registered
+                                                </small>
+                                                <a href="{{ url_for('event_scanner', event_id=event.id) }}" 
+                                                   class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-qrcode me-1"></i>Scan
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Active Events</h5>
+                            <p class="text-muted">You don't have any active events to scan QR codes for.</p>
+                            <a href="{{ url_for('create_event') }}" class="btn btn-primary">Create Event</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- QR Scanner Camera Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-qrcode me-2"></i>Live QR Scanner
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <video id="preview" class="border rounded w-100" style="max-width: 500px;"></video>
+                    <p class="mt-3 text-muted">Point the camera at the attendee's QR code</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+function onScanSuccess(decodedText, decodedResult) {
+    // Redirect to backend route to fetch person details
+    window.location.href = "/scan_qr/" + encodeURIComponent(decodedText);
+}
+
+let html5QrcodeScanner = new Html5QrcodeScanner(
+    "preview", { fps: 10, qrbox: 250 });
+html5QrcodeScanner.render(onScanSuccess);
+</script>
+{% endblock %}

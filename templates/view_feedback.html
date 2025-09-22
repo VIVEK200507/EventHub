@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback Submitted - {{ feedback.event.title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                        <h2 class="card-title">Feedback Submitted Successfully!</h2>
+                        <p class="text-muted">Thank you for sharing your experience</p>
+                    </div>
+                    
+                    <!-- Event Info -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-calendar-alt me-2"></i>{{ feedback.event.title }}
+                        </h6>
+                        <p class="mb-2">
+                            <strong>Date:</strong> {{ feedback.event.date.strftime('%A, %B %d, %Y') }} at {{ feedback.event.time.strftime('%I:%M %p') }}
+                        </p>
+                        <p class="mb-0">
+                            <strong>Location:</strong> {{ feedback.event.location }}
+                        </p>
+                    </div>
+                    
+                    <!-- Feedback Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary">Your Ratings</h6>
+                            <div class="rating-display">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Overall Rating:</span>
+                                    <div class="stars">
+                                        {% for i in range(1, 6) %}
+                                            <i class="fas fa-star {{ 'text-warning' if i <= feedback.overall_rating else 'text-muted' }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                {% if feedback.content_rating %}
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Content Quality:</span>
+                                    <div class="stars">
+                                        {% for i in range(1, 6) %}
+                                            <i class="fas fa-star {{ 'text-warning' if i <= feedback.content_rating else 'text-muted' }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if feedback.organization_rating %}
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Organization:</span>
+                                    <div class="stars">
+                                        {% for i in range(1, 6) %}
+                                            <i class="fas fa-star {{ 'text-warning' if i <= feedback.organization_rating else 'text-muted' }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if feedback.venue_rating %}
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Venue:</span>
+                                    <div class="stars">
+                                        {% for i in range(1, 6) %}
+                                            <i class="fas fa-star {{ 'text-warning' if i <= feedback.venue_rating else 'text-muted' }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if feedback.value_rating %}
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Value for Money:</span>
+                                    <div class="stars">
+                                        {% for i in range(1, 6) %}
+                                            <i class="fas fa-star {{ 'text-warning' if i <= feedback.value_rating else 'text-muted' }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary">Recommendation</h6>
+                            <div class="recommendation-display">
+                                {% if feedback.would_recommend %}
+                                    <div class="text-success">
+                                        <i class="fas fa-thumbs-up fa-2x mb-2"></i>
+                                        <p class="mb-0">You would recommend this event to others</p>
+                                    </div>
+                                {% elif feedback.would_recommend == False %}
+                                    <div class="text-danger">
+                                        <i class="fas fa-thumbs-down fa-2x mb-2"></i>
+                                        <p class="mb-0">You would not recommend this event</p>
+                                    </div>
+                                {% else %}
+                                    <div class="text-muted">
+                                        <i class="fas fa-question fa-2x mb-2"></i>
+                                        <p class="mb-0">No recommendation provided</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Text Feedback -->
+                    {% if feedback.positive_feedback or feedback.improvement_suggestions or feedback.additional_comments %}
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary">Your Comments</h6>
+                            
+                            {% if feedback.positive_feedback %}
+                                <div class="mb-3">
+                                    <h6 class="text-success">
+                                        <i class="fas fa-plus-circle me-2"></i>What you liked:
+                                    </h6>
+                                    <div class="bg-light p-3 rounded">
+                                        <p class="mb-0">{{ feedback.positive_feedback }}</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            {% if feedback.improvement_suggestions %}
+                                <div class="mb-3">
+                                    <h6 class="text-warning">
+                                        <i class="fas fa-lightbulb me-2"></i>Improvement suggestions:
+                                    </h6>
+                                    <div class="bg-light p-3 rounded">
+                                        <p class="mb-0">{{ feedback.improvement_suggestions }}</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            {% if feedback.additional_comments %}
+                                <div class="mb-3">
+                                    <h6 class="text-info">
+                                        <i class="fas fa-comment me-2"></i>Additional comments:
+                                    </h6>
+                                    <div class="bg-light p-3 rounded">
+                                        <p class="mb-0">{{ feedback.additional_comments }}</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Submission Info -->
+                    <div class="alert alert-light">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-2"></i>
+                                    Submitted: {{ feedback.submitted_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                </small>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <small class="text-muted">
+                                    <i class="fas fa-user-secret me-2"></i>
+                                    {{ 'Anonymous' if feedback.is_anonymous else 'Not Anonymous' }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{{ url_for('event_detail', event_id=feedback.event.id) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Event
+                        </a>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add some interactive elements
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to stars
+    const stars = document.querySelectorAll('.stars .fa-star');
+    stars.forEach(star => {
+        star.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.2)';
+        });
+        
+        star.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+});
+</script>
+
+<style>
+.rating-display .stars .fa-star {
+    transition: all 0.2s ease;
+    margin-right: 2px;
+}
+
+.recommendation-display {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+.alert-light {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+</style>
+{% endblock %}
+
+
+
+

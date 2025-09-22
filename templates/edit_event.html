@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Event - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-edit fa-3x text-primary mb-3"></i>
+                        <h2 class="card-title">Edit Event</h2>
+                        <p class="text-muted">Update your event details</p>
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="title" class="form-label">Event Title *</label>
+                                <input type="text" class="form-control" id="title" name="title" 
+                                       value="{{ event.title }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="category" class="form-label">Category *</label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="">Select Category</option>
+                                    <option value="Technology" {% if event.category == 'Technology' %}selected{% endif %}>Technology</option>
+                                    <option value="Business" {% if event.category == 'Business' %}selected{% endif %}>Business</option>
+                                    <option value="Education" {% if event.category == 'Education' %}selected{% endif %}>Education</option>
+                                    <option value="Health & Wellness" {% if event.category == 'Health & Wellness' %}selected{% endif %}>Health & Wellness</option>
+                                    <option value="Arts & Culture" {% if event.category == 'Arts & Culture' %}selected{% endif %}>Arts & Culture</option>
+                                    <option value="Sports & Fitness" {% if event.category == 'Sports & Fitness' %}selected{% endif %}>Sports & Fitness</option>
+                                    <option value="Food & Drink" {% if event.category == 'Food & Drink' %}selected{% endif %}>Food & Drink</option>
+                                    <option value="Networking" {% if event.category == 'Networking' %}selected{% endif %}>Networking</option>
+                                    <option value="Entertainment" {% if event.category == 'Entertainment' %}selected{% endif %}>Entertainment</option>
+                                    <option value="Other" {% if event.category == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Event Description *</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required>{{ event.description }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date" class="form-label">Event Date *</label>
+                                <input type="date" class="form-control" id="date" name="date" 
+                                       value="{{ event.date }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="time" class="form-label">Event Time *</label>
+                                <input type="time" class="form-control" id="time" name="time" 
+                                       value="{{ event.time }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location *</label>
+                            <input type="text" class="form-control" id="location" name="location" 
+                                   value="{{ event.location }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="google_maps_url" class="form-label">Google Maps URL <span class="text-muted">(Optional)</span></label>
+                            <input type="url" class="form-control" id="google_maps_url" name="google_maps_url" 
+                                   value="{{ event.google_maps_url or '' }}"
+                                   placeholder="https://maps.google.com/... or https://www.google.com/maps/...">
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Paste a Google Maps link to help attendees navigate to your venue. 
+                                <small>Example: https://maps.google.com/maps?q=Your+Venue+Name</small>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="max_attendees" class="form-label">Maximum Attendees *</label>
+                                <input type="number" class="form-control" id="max_attendees" name="max_attendees" 
+                                       value="{{ event.max_attendees }}" min="1" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label">Price</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" id="price" name="price" 
+                                           value="{{ event.price }}" min="0" step="0.01">
+                                </div>
+                                <div class="form-text">Enter 0 for free events</div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Event</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

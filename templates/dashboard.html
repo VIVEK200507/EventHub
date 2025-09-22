@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h1 class="display-4">Welcome, {{ current_user.username }}!</h1>
+            <p class="text-muted">You are now logged in to EventHub.</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h5 class="card-title">Dashboard Menu</h5>
+                    <p class="card-text">From here, you can manage your events, view details, and explore EventHub features.</p>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                        <a href="{{ url_for('create_event') }}" class="btn btn-primary btn-lg">Create Event</a>
+                        <a href="{{ url_for('view_events') }}" class="btn btn-secondary btn-lg">View Events</a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-danger btn-lg">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - Admin Dashboard - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-6 fw-bold">
+                        <i class="fas fa-users me-2"></i>User Management
+                    </h1>
+                    <p class="text-muted">Manage user roles and permissions</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="search" class="form-label">Search Users</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ search }}" placeholder="Search by name, username, or email...">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="role" class="form-label">Filter by Role</label>
+                            <select class="form-select" id="role" name="role">
+                                <option value="">All Roles</option>
+                                {% for role in roles %}
+                                    <option value="{{ role }}" {{ 'selected' if current_filter == role }}>
+                                        {{ role.title() }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Users ({{ users.total }} total)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if users.items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users.items %}
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">@{{ user.username }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <small>{{ user.email }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 'danger' if user.role == 'admin' else 'primary' if user.role == 'organizer' else 'info' if user.role == 'checker' else 'secondary' }}">
+                                                    {{ user.role.title() }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small>{{ user.created_at.strftime('%b %d, %Y') }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <!-- Role Update Dropdown -->
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-outline-primary dropdown-toggle" type="button" 
+                                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fas fa-user-cog me-1"></i>Role
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            {% for role in roles %}
+                                                                {% if role != user.role %}
+                                                                    <li>
+                                                                        <form method="POST" action="{{ url_for('update_user_role', user_id=user.id) }}" 
+                                                                              style="display: inline;">
+                                                                            <input type="hidden" name="role" value="{{ role }}">
+                                                                            <button type="submit" class="dropdown-item" 
+                                                                                    onclick="return confirm('Change {{ user.username }}\'s role to {{ role }}?')">
+                                                                                <i class="fas fa-{{ 'crown' if role == 'admin' else 'user-tie' if role == 'organizer' else 'user-check' if role == 'checker' else 'user' }} me-2"></i>
+                                                                                Set as {{ role.title() }}
+                                                                            </button>
+                                                                        </form>
+                                                                    </li>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                    
+                                                    <!-- Delete User Button -->
+                                                    {% if user.id != current_user.id %}
+                                                        <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" 
+                                                              style="display: inline;" 
+                                                              onsubmit="return confirm('Are you sure you want to delete {{ user.username }}? This action cannot be undone!')">
+                                                            <button type="submit" class="btn btn-outline-danger" title="Delete User">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    {% else %}
+                                                        <button class="btn btn-outline-secondary" disabled title="Cannot delete yourself">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if users.pages > 1 %}
+                            <nav aria-label="Users pagination" class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    {% if users.has_prev %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('admin_users', page=users.prev_num, search=search, role=current_filter) }}">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for page_num in users.iter_pages() %}
+                                        {% if page_num %}
+                                            {% if page_num != users.page %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="{{ url_for('admin_users', page=page_num, search=search, role=current_filter) }}">
+                                                        {{ page_num }}
+                                                    </a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ page_num }}</span>
+                                                </li>
+                                            {% endif %}
+                                        {% else %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if users.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('admin_users', page=users.next_num, search=search, role=current_filter) }}">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No users found</h5>
+                            <p class="text-muted">
+                                {% if search or current_filter %}
+                                    Try adjusting your search criteria.
+                                {% else %}
+                                    No users have registered yet.
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Information -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Role Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-danger me-2">Admin</span>
+                                <small class="text-muted">Full system access</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-primary me-2">Organizer</span>
+                                <small class="text-muted">Create and manage events</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-info me-2">Checker</span>
+                                <small class="text-muted">Scan QR codes for events</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-secondary me-2">User</span>
+                                <small class="text-muted">Register for events</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

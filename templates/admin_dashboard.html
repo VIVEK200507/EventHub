@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-6 fw-bold">
+                        <i class="fas fa-crown me-2 text-warning"></i>Admin Dashboard
+                    </h1>
+                    <p class="text-muted">System administration and user management</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('admin_users') }}" class="btn btn-primary">
+                        <i class="fas fa-users me-2"></i>Manage Users
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- System Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x mb-3"></i>
+                    <h4>{{ users|length }}</h4>
+                    <p class="mb-0">Total Users</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-alt fa-2x mb-3"></i>
+                    <h4>{{ events|length }}</h4>
+                    <p class="mb-0">Recent Events</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-tie fa-2x mb-3"></i>
+                    <h4>{{ users|selectattr('role', 'equalto', 'organizer')|list|length }}</h4>
+                    <p class="mb-0">Organizers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-check fa-2x mb-3"></i>
+                    <h4>{{ users|selectattr('role', 'equalto', 'checker')|list|length }}</h4>
+                    <p class="mb-0">Checkers</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Users -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>Recent Users
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if users %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users[:10] %}
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">@{{ user.username }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <small>{{ user.email }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 'danger' if user.role == 'admin' else 'primary' if user.role == 'organizer' else 'info' if user.role == 'checker' else 'secondary' }}">
+                                                    {{ user.role.title() }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small>{{ user.created_at.strftime('%b %d, %Y') }}</small>
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('admin_users') }}?search={{ user.username }}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('admin_users') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-users me-2"></i>View All Users
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No users found</h5>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Events -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>Recent Events
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if events %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>Organizer</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Registrations</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for event in events %}
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ event.title }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">{{ event.location }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <small>{{ event.organizer.first_name }} {{ event.organizer.last_name }}</small>
+                                            </td>
+                                            <td>
+                                                <small>{{ event.date.strftime('%b %d, %Y') }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if event.status == 'active' else 'warning' if event.status == 'cancelled' else 'info' }}">
+                                                    {{ event.status.title() }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small>{{ event.registrations|length }}/{{ event.max_attendees }}</small>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No events found</h5>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

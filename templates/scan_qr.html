@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}QR & Face Verification - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-6 fw-bold">QR & Face Verification</h1>
+                    <p class="text-muted">Scan attendee’s QR code and verify face for secure entry</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Scanner Camera -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-qrcode me-2"></i>Live QR Scanner</h5>
+                </div>
+                <div class="card-body text-center">
+                    <video id="preview" class="border rounded w-100" style="max-width: 500px;"></video>
+                    <p class="mt-3 text-muted">Point the camera at the attendee's QR code</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendee Info -->
+    <div class="row" id="attendee-info" style="display: none;">
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-user-check me-2"></i> Attendee Verified
+                </div>
+                <div class="card-body d-flex align-items-center">
+                    <img id="attendee-image" src="" alt="Attendee Face" class="rounded-circle me-3" style="width: 100px; height: 100px; object-fit: cover;">
+                    <div>
+                        <h5 id="attendee-name" class="mb-1"></h5>
+                        <p class="text-muted mb-0"><strong>Course:</strong> <span id="attendee-course"></span></p>
+                        <p class="text-muted mb-0"><strong>Email:</strong> <span id="attendee-email"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+function onScanSuccess(decodedText, decodedResult) {
+    fetch(`/scan_qr/${encodeURIComponent(decodedText)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show attendee info
+                document.getElementById("attendee-info").style.display = "block";
+                document.getElementById("attendee-name").innerText = data.user.name;
+                document.getElementById("attendee-course").innerText = data.user.course;
+                document.getElementById("attendee-email").innerText = data.user.email;
+                document.getElementById("attendee-image").src = data.user.image_url;
+            } else {
+                alert("QR Code not recognized: " + data.message);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error verifying QR code");
+        });
+}
+
+// Start camera QR scanner
+let html5QrcodeScanner = new Html5QrcodeScanner(
+    "preview", { fps: 10, qrbox: 250 });
+html5QrcodeScanner.render(onScanSuccess);
+</script>
+{% endblock %}

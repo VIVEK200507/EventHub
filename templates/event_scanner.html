@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block title %}QR Scanner - {{ event.title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-6 fw-bold">QR Code Scanner</h1>
+                    <p class="text-muted">{{ event.title }} - {{ event.date.strftime('%B %d, %Y') }}</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('qr_scanner') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Scanner
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Scanner Interface -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-camera me-2"></i>QR Code Scanner
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Camera Container -->
+                    <div class="scanner-container mb-4">
+                        <div id="camera-container" class="text-center">
+                            <video id="video" width="100%" height="400" style="display: none;"></video>
+                            <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+                            <div id="scanner-placeholder" class="scanner-placeholder">
+                                <i class="fas fa-camera fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Camera Scanner</h5>
+                                <p class="text-muted">Click "Start Scanner" to begin scanning QR codes</p>
+                                <button id="start-scanner" class="btn btn-primary">
+                                    <i class="fas fa-play me-2"></i>Start Scanner
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Manual Input -->
+                    <div class="manual-input">
+                        <h6 class="fw-bold mb-3">Manual QR Code Input</h6>
+                        <div class="input-group mb-3">
+                            <textarea class="form-control" id="manual-qr-input" rows="3" 
+                                      placeholder="Paste QR code data here or scan with camera above..."></textarea>
+                            <button class="btn btn-outline-primary" id="process-manual-qr">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Scan Options -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="scan-location" class="form-label">Scan Location (Optional)</label>
+                            <input type="text" class="form-control" id="scan-location" 
+                                   placeholder="e.g., Main Entrance, Registration Desk">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="scan-notes" class="form-label">Notes (Optional)</label>
+                            <input type="text" class="form-control" id="scan-notes" 
+                                   placeholder="Additional notes...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Panel -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Scan Results
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="scan-results">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-qrcode fa-2x mb-3"></i>
+                            <p>Scan a QR code to see results here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Event Stats -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Event Statistics
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h5 class="text-primary">{{ event.registrations|length }}</h5>
+                            <small class="text-muted">Registered</small>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="text-success" id="checked-in-count">0</h5>
+                            <small class="text-muted">Checked In</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('event_attendance', event_id=event.id) }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-list me-2"></i>View Attendance
+                        </a>
+                        <a href="{{ url_for('event_registrations', event_id=event.id) }}" 
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-users me-2"></i>View Registrations
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle me-2"></i>Check-in Successful!
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="success-content">
+                    <!-- Success content will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Continue Scanning</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Scan Error
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="error-content">
+                    <!-- Error content will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Try Again</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+let video, canvas, context;
+let scanning = false;
+let stream = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    video = document.getElementById('video');
+    canvas = document.getElementById('canvas');
+    context = canvas.getContext('2d');
+    
+    // Start scanner button
+    document.getElementById('start-scanner').addEventListener('click', startScanner);
+    
+    // Manual QR input
+    document.getElementById('process-manual-qr').addEventListener('click', processManualQR);
+    
+    // Load initial checked-in count
+    updateCheckedInCount();
+});
+
+function startScanner() {
+    if (scanning) {
+        stopScanner();
+        return;
+    }
+    
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(function(mediaStream) {
+            stream = mediaStream;
+            video.srcObject = stream;
+            video.play();
+            
+            document.getElementById('scanner-placeholder').style.display = 'none';
+            video.style.display = 'block';
+            document.getElementById('start-scanner').innerHTML = '<i class="fas fa-stop me-2"></i>Stop Scanner';
+            
+            scanning = true;
+            scanFrame();
+        })
+        .catch(function(err) {
+            console.error('Error accessing camera:', err);
+            alert('Error accessing camera. Please ensure you have granted camera permissions.');
+        });
+}
+
+function stopScanner() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    
+    scanning = false;
+    video.style.display = 'none';
+    document.getElementById('scanner-placeholder').style.display = 'block';
+    document.getElementById('start-scanner').innerHTML = '<i class="fas fa-play me-2"></i>Start Scanner';
+}
+
+function scanFrame() {
+    if (!scanning) return;
+    
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        
+        if (code) {
+            processQRCode(code.data);
+            return;
+        }
+    }
+    
+    requestAnimationFrame(scanFrame);
+}
+
+function processManualQR() {
+    const qrData = document.getElementById('manual-qr-input').value.trim();
+    if (qrData) {
+        processQRCode(qrData);
+        document.getElementById('manual-qr-input').value = '';
+    }
+}
+
+function processQRCode(qrData) {
+    // Stop scanning temporarily
+    const wasScanning = scanning;
+    if (scanning) {
+        stopScanner();
+    }
+    
+    const scanLocation = document.getElementById('scan-location').value;
+    const notes = document.getElementById('scan-notes').value;
+    
+    fetch('/api/scan_qr', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            qr_data: qrData,
+            event_id: {{ event.id }},
+            scan_location: scanLocation,
+            notes: notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccessModal(data);
+            updateCheckedInCount();
+        } else {
+            showErrorModal(data);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showErrorModal({ error: 'Network error occurred' });
+    })
+    .finally(() => {
+        // Resume scanning if it was active
+        if (wasScanning) {
+            setTimeout(() => startScanner(), 1000);
+        }
+    });
+}
+
+function showSuccessModal(data) {
+    const content = document.getElementById('success-content');
+    content.innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+            <h5>${data.attendance_info.user_name}</h5>
+            <p class="text-muted">Successfully checked in!</p>
+            <div class="alert alert-info">
+                <strong>Verification Code:</strong> ${data.attendance_info.verification_code}
+            </div>
+            <small class="text-muted">
+                Scanned at: ${new Date(data.attendance_info.scan_time).toLocaleString()}
+            </small>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('successModal'));
+    modal.show();
+}
+
+function showErrorModal(data) {
+    const content = document.getElementById('error-content');
+    content.innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+            <h5>Scan Failed</h5>
+            <p class="text-muted">${data.error}</p>
+            ${data.attendance_info ? `
+                <div class="alert alert-warning">
+                    <strong>Already checked in by:</strong> ${data.attendance_info.scanned_by}<br>
+                    <strong>Time:</strong> ${new Date(data.attendance_info.scan_time).toLocaleString()}
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+    modal.show();
+}
+
+function updateCheckedInCount() {
+    // This would typically fetch from an API endpoint
+    // For now, we'll update it when scans are successful
+    // You could implement a real-time update mechanism here
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+});
+</script>
+
+<style>
+.scanner-container {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+
+.scanner-placeholder {
+    padding: 40px;
+}
+
+#video {
+    border-radius: 8px;
+    background-color: #000;
+}
+
+#canvas {
+    display: none;
+}
+
+.modal-header.bg-success {
+    background-color: #198754 !important;
+}
+
+.modal-header.bg-danger {
+    background-color: #dc3545 !important;
+}
+</style>
+{% endblock %}
+
+
+
+

@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Event Registrations - {{ event.title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-6 fw-bold">Event Registrations</h1>
+                    <p class="text-muted">{{ event.title }} - {{ event.date.strftime('%B %d, %Y') }}</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Event Summary -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x mb-3"></i>
+                    <h4>{{ registrations|length }}</h4>
+                    <p class="mb-0">Total Registrations</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x mb-3"></i>
+                    <h4>{{ registrations|selectattr('status', 'equalto', 'confirmed')|list|length }}</h4>
+                    <p class="mb-0">Confirmed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-double fa-2x mb-3"></i>
+                    <h4>{{ registrations|selectattr('is_approved', 'equalto', true)|list|length }}</h4>
+                    <p class="mb-0">Approved Registrations</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x mb-3"></i>
+                    <h4>{{ registrations|selectattr('is_approved', 'equalto', false)|list|length }}</h4>
+                    <p class="mb-0">Pending Approval</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Registrations Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Registration Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if registrations %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Attendee</th>
+                                        <th>Email</th>
+                                        <th>Registration Date</th>
+                                        <th>Approval Status</th>
+                                        <th>QR Code</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dark mode compatible table rows with proper CSS classes for user information -->
+                                    {% for registration in registrations %}
+                                        <tr>
+                                            <td class="user-info">
+                                                <div>
+                                                    <strong class="user-name">{{ registration.user.first_name }} {{ registration.user.last_name }}</strong>
+                                                    <br>
+                                                    <small class="text-muted username-text">@{{ registration.user.username }}</small>
+                                                </div>
+                                            </td>
+                                            <td class="user-info">
+                                                <small class="user-email">{{ registration.user.email }}</small>
+                                            </td>
+                                            <td class="user-info">
+                                                <small class="registration-date">{{ registration.registration_date.strftime('%b %d, %Y at %I:%M %p') }}</small>
+                                            </td>
+                                            <td>
+                                                {% if registration.is_approved %}
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>Approved
+                                                    </span>
+                                                    {% if registration.approved_at %}
+                                                        <br><small class="text-muted approval-timestamp">{{ registration.approved_at.strftime('%b %d, %I:%M %p') }}</small>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-clock me-1"></i>Pending
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if registration.qr_code %}
+                                                    <span class="badge bg-{{ 'success' if registration.qr_code.is_used else 'info' }}">
+                                                        {{ 'Used' if registration.qr_code.is_used else 'Active' }}
+                                                    </span>
+                                                    {% if registration.qr_code.is_used %}
+                                                        <br>
+                                                        <small class="text-muted qr-usage-timestamp">
+                                                            Used: {{ registration.qr_code.used_at.strftime('%b %d, %I:%M %p') }}
+                                                        </small>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Not Generated</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    {% if not registration.is_approved %}
+                                                        <a href="{{ url_for('approve_single_registration', event_id=event.id, registration_id=registration.id) }}" 
+                                                           class="btn btn-outline-success" title="Approve Registration"
+                                                           onclick="return confirm('Approve this registration and generate QR pass?')">
+                                                            <i class="fas fa-check"></i> Approve
+                                                        </a>
+                                                    {% endif %}
+                                                    {% if registration.qr_code %}
+                                                        <a href="{{ url_for('view_qr_code', registration_id=registration.id) }}" 
+                                                           class="btn btn-outline-primary" title="View QR Code">
+                                                            <i class="fas fa-qrcode"></i>
+                                                        </a>
+                                                        {% if not registration.qr_code.is_used %}
+                                                            <a href="{{ url_for('verify_qr_code', registration_id=registration.id) }}" 
+                                                               class="btn btn-outline-info" title="Verify QR Code"
+                                                               onclick="return confirm('Mark this QR code as verified/used?')">
+                                                                <i class="fas fa-check-circle"></i>
+                                                            </a>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 empty-state">
+                            <i class="fas fa-users-slash fa-3x text-muted mb-3 empty-state-icon"></i>
+                            <h5 class="text-muted empty-state-title">No registrations yet</h5>
+                            <p class="text-muted empty-state-text">No one has registered for this event yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export Options -->
+    {% if registrations %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3">Export Options</h6>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-primary" onclick="exportToCSV()">
+                                <i class="fas fa-file-csv me-2"></i>Export to CSV
+                            </button>
+                            <button class="btn btn-outline-success" onclick="printRegistrations()">
+                                <i class="fas fa-print me-2"></i>Print List
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function exportToCSV() {
+    // Create CSV content
+    const table = document.querySelector('table');
+    const rows = table.querySelectorAll('tr');
+    let csv = [];
+    
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const cols = row.querySelectorAll('td, th');
+        let csvRow = [];
+        
+        for (let j = 0; j < cols.length; j++) {
+            let cellText = cols[j].innerText.replace(/"/g, '""');
+            csvRow.push('"' + cellText + '"');
+        }
+        csv.push(csvRow.join(','));
+    }
+    
+    // Download CSV
+    const csvContent = csv.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'event_registrations_{{ event.id }}.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function printRegistrations() {
+    window.print();
+}
+
+// Add print styles
+const printStyles = `
+    @media print {
+        .btn, .card-header, .d-flex.justify-content-between {
+            display: none !important;
+        }
+        .table {
+            font-size: 12px;
+        }
+    }
+`;
+
+const styleSheet = document.createElement('style');
+styleSheet.textContent = printStyles;
+document.head.appendChild(styleSheet);
+</script>
+{% endblock %}
+
+
+
+

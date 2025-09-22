@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Events - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold">Discover Events</h1>
+            <p class="text-muted">Find your next adventure from our curated selection of events</p>
+        </div>
+    </div>
+    
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="search" class="form-label">Search Events</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       value="{{ request.args.get('search', '') }}" 
+                                       placeholder="Search by title or description...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">All Categories</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat }}" {% if request.args.get('category') == cat %}selected{% endif %}>
+                                        {{ cat }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Filter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Events Grid -->
+    {% if events.items %}
+        <div class="row">
+            {% for event in events.items %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="badge bg-primary">{{ event.category }}</span>
+                                <small class="text-muted">{{ event.date.strftime('%b %d, %Y') }}</small>
+                            </div>
+                            
+                            <h5 class="card-title">{{ event.title }}</h5>
+                            <p class="card-text text-muted">{{ event.description[:120] }}{% if event.description|length > 120 %}...{% endif %}</p>
+                            
+                            <div class="event-details mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                    <small class="text-muted">{{ event.location }}</small>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-clock text-muted me-2"></i>
+                                    <small class="text-muted">{{ event.time.strftime('%I:%M %p') }}</small>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-users text-muted me-2"></i>
+                                    <small class="text-muted">{{ event.registrations|length }} / {{ event.max_attendees }} attendees</small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 text-primary mb-0">
+                                    {% if event.price > 0 %}
+                                        ₹{{ "%.2f"|format(event.price) }}
+                                    {% else %}
+                                        Free
+                                    {% endif %}
+                                </span>
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-primary btn-sm">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if events.pages > 1 %}
+            <nav aria-label="Events pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if events.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('events', page=events.prev_num, search=request.args.get('search'), category=request.args.get('category')) }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in events.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != events.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('events', page=page_num, search=request.args.get('search'), category=request.args.get('category')) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if events.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('events', page=events.next_num, search=request.args.get('search'), category=request.args.get('category')) }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-calendar-times display-1 text-muted mb-3"></i>
+            <h4 class="text-muted">No events found</h4>
+            <p class="text-muted">Try adjusting your search criteria or check back later for new events.</p>
+            <a href="{{ url_for('events') }}" class="btn btn-primary">View All Events</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

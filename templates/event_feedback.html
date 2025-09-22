@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}Event Feedback - {{ event.title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                        <h2 class="card-title">Event Feedback</h2>
+                        <p class="text-muted">Help us improve by sharing your experience</p>
+                    </div>
+                    
+                    <!-- Event Info -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-calendar-alt me-2"></i>{{ event.title }}
+                        </h6>
+                        <p class="mb-2">
+                            <strong>Date:</strong> {{ event.date.strftime('%A, %B %d, %Y') }} at {{ event.time.strftime('%I:%M %p') }}
+                        </p>
+                        <p class="mb-0">
+                            <strong>Location:</strong> {{ event.location }}
+                        </p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('submit_feedback', event_id=event.id) }}">
+                        <!-- Overall Rating -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-star me-2"></i>Overall Rating *
+                            </label>
+                            <div class="rating-input">
+                                <div class="btn-group" role="group">
+                                    <input type="radio" class="btn-check" name="overall_rating" id="overall_1" value="1" required>
+                                    <label class="btn btn-outline-warning" for="overall_1">1</label>
+                                    
+                                    <input type="radio" class="btn-check" name="overall_rating" id="overall_2" value="2" required>
+                                    <label class="btn btn-outline-warning" for="overall_2">2</label>
+                                    
+                                    <input type="radio" class="btn-check" name="overall_rating" id="overall_3" value="3" required>
+                                    <label class="btn btn-outline-warning" for="overall_3">3</label>
+                                    
+                                    <input type="radio" class="btn-check" name="overall_rating" id="overall_4" value="4" required>
+                                    <label class="btn btn-outline-warning" for="overall_4">4</label>
+                                    
+                                    <input type="radio" class="btn-check" name="overall_rating" id="overall_5" value="5" required>
+                                    <label class="btn btn-outline-warning" for="overall_5">5</label>
+                                </div>
+                                <div class="form-text">1 = Poor, 5 = Excellent</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Detailed Ratings -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-book me-2"></i>Content Quality
+                                </label>
+                                <div class="rating-input">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <input type="radio" class="btn-check" name="content_rating" id="content_1" value="1">
+                                        <label class="btn btn-outline-secondary" for="content_1">1</label>
+                                        
+                                        <input type="radio" class="btn-check" name="content_rating" id="content_2" value="2">
+                                        <label class="btn btn-outline-secondary" for="content_2">2</label>
+                                        
+                                        <input type="radio" class="btn-check" name="content_rating" id="content_3" value="3">
+                                        <label class="btn btn-outline-secondary" for="content_3">3</label>
+                                        
+                                        <input type="radio" class="btn-check" name="content_rating" id="content_4" value="4">
+                                        <label class="btn btn-outline-secondary" for="content_4">4</label>
+                                        
+                                        <input type="radio" class="btn-check" name="content_rating" id="content_5" value="5">
+                                        <label class="btn btn-outline-secondary" for="content_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-cogs me-2"></i>Organization
+                                </label>
+                                <div class="rating-input">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <input type="radio" class="btn-check" name="organization_rating" id="org_1" value="1">
+                                        <label class="btn btn-outline-secondary" for="org_1">1</label>
+                                        
+                                        <input type="radio" class="btn-check" name="organization_rating" id="org_2" value="2">
+                                        <label class="btn btn-outline-secondary" for="org_2">2</label>
+                                        
+                                        <input type="radio" class="btn-check" name="organization_rating" id="org_3" value="3">
+                                        <label class="btn btn-outline-secondary" for="org_3">3</label>
+                                        
+                                        <input type="radio" class="btn-check" name="organization_rating" id="org_4" value="4">
+                                        <label class="btn btn-outline-secondary" for="org_4">4</label>
+                                        
+                                        <input type="radio" class="btn-check" name="organization_rating" id="org_5" value="5">
+                                        <label class="btn btn-outline-secondary" for="org_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Venue
+                                </label>
+                                <div class="rating-input">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <input type="radio" class="btn-check" name="venue_rating" id="venue_1" value="1">
+                                        <label class="btn btn-outline-secondary" for="venue_1">1</label>
+                                        
+                                        <input type="radio" class="btn-check" name="venue_rating" id="venue_2" value="2">
+                                        <label class="btn btn-outline-secondary" for="venue_2">2</label>
+                                        
+                                        <input type="radio" class="btn-check" name="venue_rating" id="venue_3" value="3">
+                                        <label class="btn btn-outline-secondary" for="venue_3">3</label>
+                                        
+                                        <input type="radio" class="btn-check" name="venue_rating" id="venue_4" value="4">
+                                        <label class="btn btn-outline-secondary" for="venue_4">4</label>
+                                        
+                                        <input type="radio" class="btn-check" name="venue_rating" id="venue_5" value="5">
+                                        <label class="btn btn-outline-secondary" for="venue_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-dollar-sign me-2"></i>Value for Money
+                                </label>
+                                <div class="rating-input">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <input type="radio" class="btn-check" name="value_rating" id="value_1" value="1">
+                                        <label class="btn btn-outline-secondary" for="value_1">1</label>
+                                        
+                                        <input type="radio" class="btn-check" name="value_rating" id="value_2" value="2">
+                                        <label class="btn btn-outline-secondary" for="value_2">2</label>
+                                        
+                                        <input type="radio" class="btn-check" name="value_rating" id="value_3" value="3">
+                                        <label class="btn btn-outline-secondary" for="value_3">3</label>
+                                        
+                                        <input type="radio" class="btn-check" name="value_rating" id="value_4" value="4">
+                                        <label class="btn btn-outline-secondary" for="value_4">4</label>
+                                        
+                                        <input type="radio" class="btn-check" name="value_rating" id="value_5" value="5">
+                                        <label class="btn btn-outline-secondary" for="value_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recommendation -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-thumbs-up me-2"></i>Would you recommend this event to others?
+                            </label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="would_recommend" id="recommend_yes" value="yes">
+                                <label class="form-check-label" for="recommend_yes">
+                                    <i class="fas fa-thumbs-up text-success me-2"></i>Yes, I would recommend it
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="would_recommend" id="recommend_no" value="no">
+                                <label class="form-check-label" for="recommend_no">
+                                    <i class="fas fa-thumbs-down text-danger me-2"></i>No, I would not recommend it
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Text Feedback -->
+                        <div class="mb-4">
+                            <label for="positive_feedback" class="form-label">
+                                <i class="fas fa-plus-circle text-success me-2"></i>What did you like most about this event?
+                            </label>
+                            <textarea class="form-control" id="positive_feedback" name="positive_feedback" rows="3" 
+                                      placeholder="Share what went well and what you enjoyed..."></textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="improvement_suggestions" class="form-label">
+                                <i class="fas fa-lightbulb text-warning me-2"></i>How could we improve this event?
+                            </label>
+                            <textarea class="form-control" id="improvement_suggestions" name="improvement_suggestions" rows="3" 
+                                      placeholder="Share suggestions for improvement..."></textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="additional_comments" class="form-label">
+                                <i class="fas fa-comment text-info me-2"></i>Additional Comments
+                            </label>
+                            <textarea class="form-control" id="additional_comments" name="additional_comments" rows="3" 
+                                      placeholder="Any other thoughts or feedback..."></textarea>
+                        </div>
+                        
+                        <!-- Anonymous Option -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="is_anonymous" name="is_anonymous">
+                                <label class="form-check-label" for="is_anonymous">
+                                    <i class="fas fa-user-secret me-2"></i>Submit feedback anonymously
+                                </label>
+                                <div class="form-text">Your feedback will be shared with the organizer but your identity will remain private.</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Rating button interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers for rating buttons
+    const ratingGroups = document.querySelectorAll('.rating-input .btn-group');
+    
+    ratingGroups.forEach(group => {
+        const buttons = group.querySelectorAll('.btn');
+        const inputs = group.querySelectorAll('input[type="radio"]');
+        
+        inputs.forEach((input, index) => {
+            input.addEventListener('change', function() {
+                // Remove active class from all buttons in this group
+                buttons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to selected button and previous buttons
+                for (let i = 0; i <= index; i++) {
+                    buttons[i].classList.add('active');
+                }
+            });
+        });
+    });
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const overallRating = document.querySelector('input[name="overall_rating"]:checked');
+        
+        if (!overallRating) {
+            e.preventDefault();
+            alert('Please provide an overall rating for the event.');
+            return false;
+        }
+    });
+    
+    // Character counters for textareas
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        const maxLength = 500;
+        const counter = document.createElement('small');
+        counter.className = 'text-muted';
+        counter.style.float = 'right';
+        textarea.parentNode.appendChild(counter);
+        
+        function updateCounter() {
+            const remaining = maxLength - textarea.value.length;
+            counter.textContent = `${remaining} characters remaining`;
+            counter.className = remaining < 50 ? 'text-danger' : 'text-muted';
+        }
+        
+        textarea.addEventListener('input', updateCounter);
+        textarea.setAttribute('maxlength', maxLength);
+        updateCounter();
+    });
+});
+</script>
+
+<style>
+.rating-input .btn {
+    min-width: 40px;
+}
+
+.rating-input .btn-group-sm .btn {
+    min-width: 30px;
+}
+
+.rating-input .btn.active {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
+.rating-input .btn:hover {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.alert-info {
+    background-color: rgba(13, 202, 240, 0.1);
+    border-left: 4px solid #0dcaf0;
+}
+</style>
+{% endblock %}
+
+
+
+

@@ -1,0 +1,714 @@
+/* Custom CSS for EventHub */
+
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --info-color: #0dcaf0;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+}
+
+/* Global Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Navigation */
+.navbar-glass {
+    background: linear-gradient(135deg, rgba(13,110,253,0.95) 0%, rgba(0,86,179,0.95) 100%) !important;
+    backdrop-filter: saturate(180%) blur(8px);
+    -webkit-backdrop-filter: saturate(180%) blur(8px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease, padding 0.3s ease;
+}
+
+.navbar-glass.navbar-scrolled {
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.2px;
+}
+
+.navbar-nav .nav-link {
+    position: relative;
+    font-weight: 500;
+    color: #ffffffcc !important;
+    padding: 0.5rem 0.75rem;
+    transition: color 0.2s ease;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    color: #fff !important;
+}
+
+.navbar-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.3rem;
+    height: 2px;
+    background: #fff;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.25s ease;
+    opacity: 0.85;
+}
+
+.navbar-nav .nav-link:hover::after,
+.navbar-nav .nav-link.active::after {
+    transform: scaleX(1);
+}
+
+.navbar .dropdown-menu {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    padding: 0.5rem;
+}
+
+.navbar .dropdown-item {
+    border-radius: 8px;
+}
+
+.navbar .dropdown-item:hover {
+    background-color: rgba(13,110,253,0.1);
+}
+
+/* Navbar Search */
+.nav-search .form-control::placeholder { color: rgba(255,255,255,0.75); }
+.nav-search .form-control:focus { box-shadow: none; }
+.nav-search .input-group-text { color: rgba(255,255,255,0.75); }
+
+/* Collapse slide-down animation */
+.navbar .collapse {
+    transition: height 0.25s ease;
+}
+
+/* Dark mode */
+body.dark-mode {
+    background-color: #121212;
+    color: #e6e6e6;
+}
+
+body.dark-mode .navbar-glass {
+    background: linear-gradient(135deg, rgba(18,18,18,0.95) 0%, rgba(28,28,28,0.95) 100%) !important;
+}
+
+body.dark-mode .navbar-nav .nav-link { color: #e6e6e6cc !important; }
+body.dark-mode .navbar-nav .nav-link:hover,
+body.dark-mode .navbar-nav .nav-link.active { color: #ffffff !important; }
+body.dark-mode .navbar .dropdown-menu { background: #1f1f1f; }
+body.dark-mode .navbar .dropdown-item { color: #e6e6e6; }
+body.dark-mode .navbar .dropdown-item:hover { background-color: #2a2a2a; }
+body.dark-mode .btn-light { color: #111; }
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+}
+
+.hero-image i {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Event Cards */
+.event-details {
+    font-size: 0.9rem;
+}
+
+.event-details i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Feature Icons */
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, var(--primary-color) 100%);
+}
+
+/* Forms */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.input-group-text {
+    border-radius: 8px 0 0 8px;
+    border: 2px solid #e9ecef;
+    border-right: none;
+    background-color: #f8f9fa;
+}
+
+.input-group .form-control {
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+}
+
+/* Alerts */
+.alert {
+    border: none;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.alert-success {
+    border-left-color: var(--success-color);
+    background-color: rgba(25, 135, 84, 0.1);
+}
+
+.alert-danger {
+    border-left-color: var(--danger-color);
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.alert-warning {
+    border-left-color: var(--warning-color);
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.alert-info {
+    border-left-color: var(--info-color);
+    background-color: rgba(13, 202, 240, 0.1);
+}
+
+/* Badges */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.5em 0.75em;
+    border-radius: 6px;
+}
+
+/* Tables */
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table thead th {
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Pagination */
+.pagination .page-link {
+    border-radius: 6px;
+    margin: 0 2px;
+    border: 1px solid #dee2e6;
+    color: var(--primary-color);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
+
+/* Dashboard Stats */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-info,
+.card.bg-warning {
+    border: none;
+    border-radius: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 300px;
+        text-align: center;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Custom Utilities */
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.shadow-custom {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.border-gradient {
+    border: 2px solid;
+    border-image: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%) 1;
+}
+
+/* Event Status Colors */
+.status-active {
+    color: var(--success-color);
+}
+
+.status-cancelled {
+    color: var(--danger-color);
+}
+
+.status-completed {
+    color: var(--secondary-color);
+}
+
+/* Registration Status */
+.registration-confirmed {
+    color: var(--success-color);
+}
+
+.registration-cancelled {
+    color: var(--danger-color);
+}
+
+.registration-waitlist {
+    color: var(--warning-color);
+}
+
+/* ===== Theming (Light/Dark via CSS Variables) ===== */
+:root {
+    /* Light theme defaults */
+    --bg-start: #ffffff;
+    --bg-end: #f4f6f8;
+    --text-color: #1c1f23;
+    --muted-text-color: #6c757d;
+    --card-bg: #ffffff;
+    --card-border: #e9ecef;
+    --card-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    --card-shadow-hover: 0 12px 30px rgba(13, 110, 253, 0.15);
+    --input-bg: #ffffff;
+    --input-border: #e9ecef;
+    --dropdown-bg: #ffffff;
+    --dropdown-item: #212529;
+    --dropdown-item-hover: rgba(13,110,253,0.08);
+    --navbar-grad-start: rgba(13,110,253,0.95);
+    --navbar-grad-end: rgba(88,86,214,0.95);
+    --button-grad-start: #4dabf7;
+    --button-grad-end: #845ef7;
+}
+
+body.dark-mode {
+    --bg-start: #121212;
+    --bg-end: #1e1e1e;
+    --text-color: #e6e6e6;
+    --muted-text-color: #b5b5b5;
+    --card-bg: #1b1b1b;
+    --card-border: #2a2a2a;
+    --card-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    --card-shadow-hover: 0 14px 36px rgba(132, 94, 247, 0.35);
+    --input-bg: #191919;
+    --input-border: #2a2a2a;
+    --dropdown-bg: #1f1f1f;
+    --dropdown-item: #e6e6e6;
+    --dropdown-item-hover: #2a2a2a;
+    --navbar-grad-start: rgba(18,18,18,0.95);
+    --navbar-grad-end: rgba(28,28,28,0.95);
+    --button-grad-start: #4dabf7;
+    --button-grad-end: #845ef7;
+}
+
+/* Global apply */
+body {
+    color: var(--text-color);
+    background: linear-gradient(180deg, var(--bg-start), var(--bg-end));
+}
+
+/* Smooth theme transitions */
+html, body, .card, .btn, .navbar-glass, .form-control, .form-select, .modal-content, .dropdown-menu, .table, .feature-card {
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease, filter 0.3s ease;
+}
+
+/* Navbar uses theme gradient */
+.navbar-glass {
+    background: linear-gradient(135deg, var(--navbar-grad-start) 0%, var(--navbar-grad-end) 100%) !important;
+}
+
+/* Dropdowns */
+.navbar .dropdown-menu {
+    background: var(--dropdown-bg);
+    color: var(--dropdown-item);
+    border: 1px solid var(--card-border);
+}
+
+.navbar .dropdown-item {
+    color: var(--dropdown-item);
+}
+
+.navbar .dropdown-item:hover {
+    background-color: var(--dropdown-item-hover);
+}
+
+/* Cards */
+.card {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+}
+
+.card:hover {
+    box-shadow: var(--card-shadow-hover) !important;
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, var(--button-grad-start) 0%, var(--button-grad-end) 100%);
+    border: none;
+}
+
+/* Forms */
+.form-control, .form-select {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: 2px solid var(--input-border);
+}
+
+/* Modal */
+.modal-content {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--card-border);
+}
+
+/* Tables */
+.table thead th {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+/* ===== User Information Dark Mode Compatibility ===== */
+/*
+ * Dark Mode Implementation for Organizer Dashboard Tables
+ * 
+ * This section provides comprehensive dark mode support for user information
+ * displayed in tables throughout the organizer dashboard, ensuring:
+ * 
+ * 1. Accessibility: High contrast ratios for text readability
+ * 2. Consistency: Unified styling across all dashboard components
+ * 3. Usability: Enhanced hover and focus states for better interaction
+ * 4. Print Support: Proper contrast when printing in dark mode
+ * 
+ * Components styled:
+ * - User names, emails, registration dates (event_registrations.html)
+ * - Event titles, dates, locations (organizer_dashboard.html)
+ * - Approval timestamps and QR usage timestamps
+ * - Empty state messages and icons
+ * - Table hover and focus states
+ */
+
+/* Light mode styles for user information */
+.user-info .user-name,
+.user-info .user-email,
+.user-info .registration-date {
+    color: #212529;
+    transition: color 0.3s ease;
+}
+
+.user-info .username-text {
+    color: #6c757d;
+    transition: color 0.3s ease;
+}
+
+/* Dark mode styles for user information */
+body.dark-mode .user-info .user-name,
+body.dark-mode .user-info .user-email,
+body.dark-mode .user-info .registration-date {
+    color: #ffffff !important;
+}
+
+body.dark-mode .user-info .username-text {
+    color: #b5b5b5 !important;
+}
+
+/* Table hover states for dark mode */
+body.dark-mode .table tbody tr:hover {
+    background-color: rgba(132, 94, 247, 0.1);
+}
+
+body.dark-mode .table tbody tr:hover .user-info .user-name,
+body.dark-mode .table tbody tr:hover .user-info .user-email,
+body.dark-mode .table tbody tr:hover .user-info .registration-date {
+    color: #ffffff !important;
+}
+
+body.dark-mode .table tbody tr:hover .user-info .username-text {
+    color: #d0d0d0 !important;
+}
+
+/* Ensure table headers are properly styled in dark mode */
+body.dark-mode .table thead th {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-bottom: 2px solid var(--card-border);
+}
+
+/* Table borders and structure in dark mode */
+body.dark-mode .table {
+    border-color: var(--card-border);
+}
+
+body.dark-mode .table td {
+    border-color: var(--card-border);
+    color: var(--text-color);
+}
+
+/* Action buttons hover states in dark mode */
+body.dark-mode .btn-outline-success:hover,
+body.dark-mode .btn-outline-primary:hover,
+body.dark-mode .btn-outline-info:hover {
+    color: #ffffff;
+}
+
+/* Badge contrast in dark mode */
+body.dark-mode .badge.bg-success,
+body.dark-mode .badge.bg-warning,
+body.dark-mode .badge.bg-info,
+body.dark-mode .badge.bg-secondary {
+    color: #ffffff;
+}
+
+/* Export options section in dark mode */
+body.dark-mode .card .card-body h6 {
+    color: var(--text-color);
+}
+
+/* Status indicators enhanced contrast */
+body.dark-mode .text-muted {
+    color: var(--muted-text-color) !important;
+}
+
+/* Timestamp elements specific styling */
+body.dark-mode .approval-timestamp,
+body.dark-mode .qr-usage-timestamp {
+    color: #b5b5b5 !important;
+}
+
+/* Hover enhancement for timestamps */
+body.dark-mode .table tbody tr:hover .approval-timestamp,
+body.dark-mode .table tbody tr:hover .qr-usage-timestamp {
+    color: #d0d0d0 !important;
+}
+
+/* ===== Organizer Dashboard Event Information Dark Mode ===== */
+/* Light mode styles for event information */
+.event-info .event-title,
+.event-info .event-date,
+.event-info .event-location {
+    color: #212529;
+    transition: color 0.3s ease;
+}
+
+.event-info .event-category,
+.event-info .event-time {
+    color: #6c757d;
+    transition: color 0.3s ease;
+}
+
+/* Dark mode styles for event information */
+body.dark-mode .event-info .event-title,
+body.dark-mode .event-info .event-date,
+body.dark-mode .event-info .event-location {
+    color: #ffffff !important;
+}
+
+body.dark-mode .event-info .event-category,
+body.dark-mode .event-info .event-time {
+    color: #b5b5b5 !important;
+}
+
+/* Hover enhancement for event information */
+body.dark-mode .table tbody tr:hover .event-info .event-title,
+body.dark-mode .table tbody tr:hover .event-info .event-date,
+body.dark-mode .table tbody tr:hover .event-info .event-location {
+    color: #ffffff !important;
+}
+
+body.dark-mode .table tbody tr:hover .event-info .event-category,
+body.dark-mode .table tbody tr:hover .event-info .event-time {
+    color: #d0d0d0 !important;
+}
+
+/* ===== Empty State Dark Mode Compatibility ===== */
+/* Dark mode styles for empty states */
+body.dark-mode .empty-state .empty-state-icon,
+body.dark-mode .empty-state .empty-state-title,
+body.dark-mode .empty-state .empty-state-text {
+    color: var(--muted-text-color) !important;
+}
+
+/* ===== Enhanced Accessibility and Focus States ===== */
+/* Focus states for table rows in dark mode */
+body.dark-mode .table tbody tr:focus-within {
+    background-color: rgba(132, 94, 247, 0.15);
+    outline: 2px solid #845ef7;
+    outline-offset: -2px;
+}
+
+/* Button focus states in dark mode */
+body.dark-mode .btn:focus {
+    box-shadow: 0 0 0 0.25rem rgba(132, 94, 247, 0.25);
+}
+
+/* Enhanced contrast for links in dark mode */
+body.dark-mode a:not(.btn):not(.nav-link):not(.dropdown-item) {
+    color: #74c0fc;
+}
+
+body.dark-mode a:not(.btn):not(.nav-link):not(.dropdown-item):hover {
+    color: #339af0;
+}
+
+/* Print styles for dark mode */
+@media print {
+    body.dark-mode {
+        background: white !important;
+        color: black !important;
+    }
+    
+    body.dark-mode .user-info .user-name,
+    body.dark-mode .user-info .user-email,
+    body.dark-mode .user-info .registration-date,
+    body.dark-mode .event-info .event-title,
+    body.dark-mode .event-info .event-date,
+    body.dark-mode .event-info .event-location {
+        color: black !important;
+    }
+    
+    body.dark-mode .user-info .username-text,
+    body.dark-mode .event-info .event-category,
+    body.dark-mode .event-info .event-time {
+        color: #666 !important;
+    }
+}
+
+/* Features Section (Why Choose EventHub) */
+.features-section .feature-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+}
+
+.features-section .feature-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.features-section .feature-icon {
+    background: linear-gradient(135deg, var(--button-grad-start), var(--button-grad-end));
+}
+
+

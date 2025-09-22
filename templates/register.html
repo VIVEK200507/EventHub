@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Register - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-body p-4">
+          <h2 class="mb-4 text-center fw-bold">Create an Account</h2>
+
+          <form method="POST" class="needs-validation" novalidate>
+            <!-- Username -->
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" id="username" name="username" class="form-control" required>
+              <div class="invalid-feedback">Please enter a username.</div>
+            </div>
+
+            <!-- First Name -->
+            <div class="mb-3">
+              <label for="first_name" class="form-label">First Name</label>
+              <input type="text" id="first_name" name="first_name" class="form-control" required>
+              <div class="invalid-feedback">Please enter your first name.</div>
+            </div>
+
+            <!-- Last Name -->
+            <div class="mb-3">
+              <label for="last_name" class="form-label">Last Name</label>
+              <input type="text" id="last_name" name="last_name" class="form-control" required>
+              <div class="invalid-feedback">Please enter your last name.</div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" id="email" name="email" class="form-control" required>
+              <div class="invalid-feedback">Please enter a valid email address.</div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" id="password" name="password" class="form-control" required>
+              <div class="invalid-feedback">Please enter a password.</div>
+            </div>
+
+            <!-- Role Selection -->
+            <div class="mb-3">
+              <label for="role" class="form-label">Role</label>
+              <select id="role" name="role" class="form-select" required>
+                <option value="">Select Role</option>
+                <option value="student">Student</option>
+                <option value="faculty">Faculty</option>
+                <option value="technician">Technician</option>
+              </select>
+              <div class="invalid-feedback">Please select your role.</div>
+            </div>
+
+            <!-- Student Options -->
+            <div class="mb-3 d-none" id="student-options">
+              <label for="student-course" class="form-label">Course</label>
+              <select id="student-course" name="details" class="form-select">
+                <option value="BSc IT">BSc IT</option>
+                <option value="BCA">BCA</option>
+                <option value="BBA">BBA</option>
+                <option value="B.Com">B.Com</option>
+              </select>
+            </div>
+
+            <!-- Faculty Options -->
+            <div class="mb-3 d-none" id="faculty-options">
+              <label for="faculty-department" class="form-label">Department</label>
+              <select id="faculty-department" name="details" class="form-select">
+                <option value="Arts & Commerce">Arts & Commerce</option>
+                <option value="IT">IT</option>
+                <option value="Animation">Animation</option>
+                <option value="Yoga">Yoga</option>
+              </select>
+            </div>
+
+            <!-- Technician Options -->
+            <div class="mb-3 d-none" id="technician-options">
+              <label for="technician-type" class="form-label">Technician Type</label>
+              <select id="technician-type" name="details" class="form-select">
+                <option value="Electric">Electric</option>
+                <option value="Plumber">Plumber</option>
+                <option value="Event Technician">Event Technician</option>
+              </select>
+            </div>
+
+            <!-- Organizer Checkbox -->
+            <div class="form-check mb-3">
+              <input type="checkbox" id="is_organizer" name="is_organizer" class="form-check-input">
+              <label for="is_organizer" class="form-check-label">Register as Organizer</label>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn btn-primary w-100">Register</button>
+          </form>
+
+          <p class="mt-3 text-center">
+            Already have an account? <a href="{{ url_for('login') }}">Login here</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Inline Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const roleSelect = document.getElementById('role');
+  const studentOptions = document.getElementById('student-options');
+  const facultyOptions = document.getElementById('faculty-options');
+  const technicianOptions = document.getElementById('technician-options');
+
+  roleSelect.addEventListener('change', function () {
+    studentOptions.classList.add('d-none');
+    facultyOptions.classList.add('d-none');
+    technicianOptions.classList.add('d-none');
+
+    if (this.value === 'student') {
+      studentOptions.classList.remove('d-none');
+    } else if (this.value === 'faculty') {
+      facultyOptions.classList.remove('d-none');
+    } else if (this.value === 'technician') {
+      technicianOptions.classList.remove('d-none');
+    }
+  });
+});
+</script>
+{% endblock %}

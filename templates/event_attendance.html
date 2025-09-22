@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Event Attendance - {{ event.title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-6 fw-bold">Event Attendance</h1>
+                    <p class="text-muted">{{ event.title }} - {{ event.date.strftime('%B %d, %Y') }}</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('event_scanner', event_id=event.id) }}" class="btn btn-primary me-2">
+                        <i class="fas fa-qrcode me-2"></i>QR Scanner
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Attendance Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x mb-3"></i>
+                    <h4>{{ total_registrations }}</h4>
+                    <p class="mb-0">Total Registered</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x mb-3"></i>
+                    <h4>{{ total_attendance }}</h4>
+                    <p class="mb-0">Checked In</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-2x mb-3"></i>
+                    <h4>{{ "%.1f"|format(attendance_rate) }}%</h4>
+                    <p class="mb-0">Attendance Rate</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-times fa-2x mb-3"></i>
+                    <h4>{{ total_registrations - total_attendance }}</h4>
+                    <p class="mb-0">No Show</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Attendance Records -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Attendance Records
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if attendance_records %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Attendee</th>
+                                        <th>Check-in Time</th>
+                                        <th>Scanned By</th>
+                                        <th>Location</th>
+                                        <th>Verification Code</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in attendance_records %}
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ record.user.first_name }} {{ record.user.last_name }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">{{ record.user.email }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ record.scan_time.strftime('%I:%M %p') }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">{{ record.scan_time.strftime('%b %d, %Y') }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <small>{{ record.scanner.username }}</small>
+                                            </td>
+                                            <td>
+                                                <small>{{ record.scan_location or 'Not specified' }}</small>
+                                            </td>
+                                            <td>
+                                                <code class="small">
+                                                    {{ record.qr_data.verification_code if record.qr_data and record.qr_data.verification_code is defined else 'N/A' }}
+                                                </code>
+                                            </td>
+                                            <td>
+                                                <small>{{ record.notes or '-' }}</small>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-user-check fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Attendance Records</h5>
+                            <p class="text-muted">No one has checked in yet. Start scanning QR codes to record attendance.</p>
+                            <a href="{{ url_for('event_scanner', event_id=event.id) }}" class="btn btn-primary">
+                                <i class="fas fa-qrcode me-2"></i>Start Scanning
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export and Actions -->
+    {% if attendance_records %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3">Export & Actions</h6>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-primary" onclick="exportAttendanceToCSV()">
+                                <i class="fas fa-file-csv me-2"></i>Export to CSV
+                            </button>
+                            <button class="btn btn-outline-success" onclick="printAttendance()">
+                                <i class="fas fa-print me-2"></i>Print List
+                            </button>
+                            <a href="{{ url_for('event_registrations', event_id=event.id) }}" class="btn btn-outline-info">
+                                <i class="fas fa-users me-2"></i>View All Registrations
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function exportAttendanceToCSV() {
+    const table = document.querySelector('table');
+    const rows = table.querySelectorAll('tr');
+    let csv = [];
+    
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const cols = row.querySelectorAll('td, th');
+        let csvRow = [];
+        
+        for (let j = 0; j < cols.length; j++) {
+            let cellText = cols[j].innerText.replace(/"/g, '""');
+            csvRow.push('"' + cellText + '"');
+        }
+        csv.push(csvRow.join(','));
+    }
+    
+    const csvContent = csv.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'attendance_{{ event.id }}_{{ event.date.strftime("%Y%m%d") }}.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function printAttendance() {
+    window.print();
+}
+
+// Add print styles
+const printStyles = `
+    @media print {
+        .btn, .card-header, .d-flex.justify-content-between {
+            display: none !important;
+        }
+        .table {
+            font-size: 12px;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+`;
+
+const styleSheet = document.createElement('style');
+styleSheet.textContent = printStyles;
+document.head.appendChild(styleSheet);
+</script>
+{% endblock %}

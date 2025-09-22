@@ -1,0 +1,439 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback Report - {{ event.title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-6 fw-bold">Feedback Report</h1>
+                    <p class="text-muted">{{ event.title }} - {{ event.date.strftime('%B %d, %Y') }}</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('export_feedback', event_id=event.id) }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-download me-2"></i>Export CSV
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Summary Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-comments fa-2x mb-3"></i>
+                    <h4>{{ total_feedback }}</h4>
+                    <p class="mb-0">Total Feedback</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-2x mb-3"></i>
+                    <h4>{{ "%.1f"|format(avg_overall) }}</h4>
+                    <p class="mb-0">Avg Overall Rating</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-thumbs-up fa-2x mb-3"></i>
+                    <h4>{{ "%.1f"|format(recommend_rate) }}%</h4>
+                    <p class="mb-0">Recommendation Rate</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-2x mb-3"></i>
+                    <h4>{{ "%.1f"|format((total_feedback / event.registrations|length * 100) if event.registrations|length > 0 else 0) }}%</h4>
+                    <p class="mb-0">Response Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Average Ratings Breakdown -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Average Ratings Breakdown
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="rating-summary">
+                                <h6>Overall Rating</h6>
+                                <div class="rating-display">
+                                    <span class="rating-number">{{ "%.1f"|format(avg_overall) }}</span>
+                                    <div class="stars">
+                                        {% for i in range(1, 6) %}
+                                            <i class="fas fa-star {{ 'text-warning' if i <= avg_overall else 'text-muted' }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if avg_content > 0 %}
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="rating-summary">
+                                <h6>Content Quality</h6>
+                                <div class="rating-display">
+                                    <span class="rating-number">{{ "%.1f"|format(avg_content) }}</span>
+                                    <div class="stars">
+                                        {% for i in range(1, 6) %}
+                                            <i class="fas fa-star {{ 'text-warning' if i <= avg_content else 'text-muted' }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if avg_organization > 0 %}
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="rating-summary">
+                                <h6>Organization</h6>
+                                <div class="rating-display">
+                                    <span class="rating-number">{{ "%.1f"|format(avg_organization) }}</span>
+                                    <div class="stars">
+                                        {% for i in range(1, 6) %}
+                                            <i class="fas fa-star {{ 'text-warning' if i <= avg_organization else 'text-muted' }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if avg_venue > 0 %}
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="rating-summary">
+                                <h6>Venue</h6>
+                                <div class="rating-display">
+                                    <span class="rating-number">{{ "%.1f"|format(avg_venue) }}</span>
+                                    <div class="stars">
+                                        {% for i in range(1, 6) %}
+                                            <i class="fas fa-star {{ 'text-warning' if i <= avg_venue else 'text-muted' }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if avg_value > 0 %}
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="rating-summary">
+                                <h6>Value for Money</h6>
+                                <div class="rating-display">
+                                    <span class="rating-number">{{ "%.1f"|format(avg_value) }}</span>
+                                    <div class="stars">
+                                        {% for i in range(1, 6) %}
+                                            <i class="fas fa-star {{ 'text-warning' if i <= avg_value else 'text-muted' }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rating Distribution -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Rating Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for rating, count in rating_distribution.items() %}
+                            <div class="col-md-2 col-6 mb-3">
+                                <div class="rating-distribution">
+                                    <div class="rating-bar">
+                                        <div class="rating-fill" style="width: {{ (count / total_feedback * 100) if total_feedback > 0 else 0 }}%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="rating-label">{{ rating }} Star{{ 's' if rating != 1 else '' }}</span>
+                                        <span class="rating-count">{{ count }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Text Feedback Analysis -->
+    <div class="row">
+        <!-- Positive Feedback -->
+        {% if positive_feedback %}
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0 text-success">
+                        <i class="fas fa-plus-circle me-2"></i>Positive Feedback ({{ positive_feedback|length }} responses)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="feedback-comments">
+                        {% for comment in positive_feedback %}
+                            <div class="feedback-item mb-3">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-0">{{ comment }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Improvement Suggestions -->
+        {% if improvement_suggestions %}
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0 text-warning">
+                        <i class="fas fa-lightbulb me-2"></i>Improvement Suggestions ({{ improvement_suggestions|length }} responses)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="feedback-comments">
+                        {% for comment in improvement_suggestions %}
+                            <div class="feedback-item mb-3">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-0">{{ comment }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Additional Comments -->
+    {% if additional_comments %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0 text-info">
+                        <i class="fas fa-comment me-2"></i>Additional Comments ({{ additional_comments|length }} responses)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="feedback-comments">
+                        {% for comment in additional_comments %}
+                            <div class="feedback-item mb-3">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-0">{{ comment }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Individual Feedback Records -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Individual Feedback Records
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Overall Rating</th>
+                                    <th>Recommendation</th>
+                                    <th>Submitted</th>
+                                    <th>Anonymous</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for feedback in feedback_records %}
+                                    <tr>
+                                        <td>
+                                            {% if feedback.is_anonymous %}
+                                                <span class="text-muted">Anonymous</span>
+                                            {% else %}
+                                                {{ feedback.user.first_name }} {{ feedback.user.last_name }}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="stars">
+                                                {% for i in range(1, 6) %}
+                                                    <i class="fas fa-star {{ 'text-warning' if i <= feedback.overall_rating else 'text-muted' }}"></i>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if feedback.would_recommend %}
+                                                <span class="badge bg-success">Yes</span>
+                                            {% elif feedback.would_recommend == False %}
+                                                <span class="badge bg-danger">No</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small>{{ feedback.submitted_at.strftime('%b %d, %Y') }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'info' if feedback.is_anonymous else 'light text-dark' }}">
+                                                {{ 'Yes' if feedback.is_anonymous else 'No' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add print functionality
+function printReport() {
+    window.print();
+}
+
+// Add print button
+document.addEventListener('DOMContentLoaded', function() {
+    const printButton = document.createElement('button');
+    printButton.className = 'btn btn-outline-secondary';
+    printButton.innerHTML = '<i class="fas fa-print me-2"></i>Print Report';
+    printButton.onclick = printReport;
+    
+    const buttonContainer = document.querySelector('.d-flex.justify-content-between.align-items-center .btn-group');
+    if (buttonContainer) {
+        buttonContainer.appendChild(printButton);
+    } else {
+        // If no button group exists, add to the main button area
+        const mainButtonArea = document.querySelector('.d-flex.justify-content-between.align-items-center');
+        if (mainButtonArea) {
+            mainButtonArea.appendChild(printButton);
+        }
+    }
+});
+</script>
+
+<style>
+.rating-summary {
+    text-align: center;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+.rating-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffc107;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.rating-display .stars .fa-star {
+    margin-right: 2px;
+}
+
+.rating-distribution {
+    text-align: center;
+}
+
+.rating-bar {
+    height: 20px;
+    background-color: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.rating-fill {
+    height: 100%;
+    background-color: #ffc107;
+    transition: width 0.3s ease;
+}
+
+.rating-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.rating-count {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #6c757d;
+}
+
+.feedback-item {
+    border-left: 3px solid #dee2e6;
+    padding-left: 10px;
+}
+
+.feedback-comments {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+@media print {
+    .btn, .card-header {
+        display: none !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .container {
+        max-width: none !important;
+    }
+}
+</style>
+{% endblock %}
+
+
+
+

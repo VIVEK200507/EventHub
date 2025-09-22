@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <span class="badge bg-primary fs-6">{{ event.category }}</span>
+                            <h1 class="display-6 fw-bold mt-2">{{ event.title }}</h1>
+                        </div>
+                        <div class="text-end">
+                            <div class="h3 text-primary mb-0">
+                                {% if event.price > 0 %}
+                                    ₹{{ "%.2f"|format(event.price) }}
+                                {% else %}
+                                    Free
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-calendar-alt text-primary me-3 fa-lg"></i>
+                                <div>
+                                    <strong>Date</strong><br>
+                                    <span class="text-muted">{{ event.date.strftime('%A, %B %d, %Y') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-clock text-primary me-3 fa-lg"></i>
+                                <div>
+                                    <strong>Time</strong><br>
+                                    <span class="text-muted">{{ event.time.strftime('%I:%M %p') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-map-marker-alt text-primary me-3 fa-lg"></i>
+                                <div>
+                                    <strong>Location</strong><br>
+                                    <span class="text-muted">{{ event.location }}</span>
+                                    {% if event.google_maps_url %}
+                                        <br>
+                                        <a href="{{ event.google_maps_url }}" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
+                                            <i class="fas fa-map-marked-alt me-1"></i>View on Google Maps
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-users text-primary me-3 fa-lg"></i>
+                                <div>
+                                    <strong>Capacity</strong><br>
+                                    <span class="text-muted">{{ attendees_count }} / {{ event.max_attendees }} attendees</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5 class="fw-bold mb-3">About This Event</h5>
+                    <p class="lead">{{ event.description }}</p>
+                    
+                    {% if event.google_maps_url %}
+                        <hr>
+                        
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-map-marked-alt text-primary me-2"></i>Event Location
+                        </h5>
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold">Address</h6>
+                                        <p class="text-muted mb-3">{{ event.location }}</p>
+                                        
+                                        <div class="d-grid gap-2">
+                                            <a href="{{ event.google_maps_url }}" target="_blank" class="btn btn-primary">
+                                                <i class="fas fa-external-link-alt me-2"></i>Open in Google Maps
+                                            </a>
+                                            <a href="{{ event.google_maps_url }}" target="_blank" class="btn btn-outline-primary">
+                                                <i class="fas fa-directions me-2"></i>Get Directions
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="map-container">
+                                            <div class="map-placeholder bg-light d-flex align-items-center justify-content-center" style="height: 200px; border-radius: 8px;">
+                                                <div class="text-center">
+                                                    <i class="fas fa-map-marker-alt fa-3x text-muted mb-2"></i>
+                                                    <p class="text-muted mb-0">Interactive Map</p>
+                                                    <small class="text-muted">Click "Open in Google Maps" to view</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-user-circle text-primary me-3 fa-2x"></i>
+                        <div>
+                            <strong>Organized by</strong><br>
+                            <span class="text-muted">{{ event.organizer.first_name }} {{ event.organizer.last_name }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    {% if current_user.is_authenticated %}
+                        {% if is_registered %}
+                            <div class="text-center mb-4">
+                                <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                                <h5 class="text-success">You're Registered!</h5>
+                                <p class="text-muted">You're all set for this event.</p>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('view_qr_code', registration_id=registration.id) }}" 
+                                   class="btn btn-primary">
+                                    <i class="fas fa-qrcode me-2"></i>View QR Code
+                                </a>
+                                <a href="{{ url_for('event_feedback', event_id=event.id) }}" 
+                                   class="btn btn-outline-success">
+                                    <i class="fas fa-star me-2"></i>Give Feedback
+                                </a>
+                                <a href="{{ url_for('cancel_registration', event_id=event.id) }}" 
+                                   class="btn btn-outline-danger"
+                                   onclick="return confirm('Are you sure you want to cancel your registration?')">
+                                    <i class="fas fa-times me-2"></i>Cancel Registration
+                                </a>
+                            </div>
+                        {% else %}
+                            {% if attendees_count >= event.max_attendees %}
+                                <div class="text-center mb-4">
+                                    <i class="fas fa-exclamation-triangle text-warning fa-3x mb-3"></i>
+                                    <h5 class="text-warning">Event Full</h5>
+                                    <p class="text-muted">This event has reached its maximum capacity.</p>
+                                </div>
+                            {% else %}
+                                <div class="text-center mb-4">
+                                    <i class="fas fa-calendar-plus text-primary fa-3x mb-3"></i>
+                                    <h5>Join This Event</h5>
+                                    <p class="text-muted">Register now to secure your spot!</p>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <a href="{{ url_for('register_event', event_id=event.id) }}" 
+                                       class="btn btn-primary btn-lg">
+                                        <i class="fas fa-user-plus me-2"></i>Register Now
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center mb-4">
+                            <i class="fas fa-sign-in-alt text-primary fa-3x mb-3"></i>
+                            <h5>Sign In Required</h5>
+                            <p class="text-muted">Please sign in to register for this event.</p>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('login') }}" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </a>
+                            <a href="{{ url_for('register') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </a>
+                        </div>
+                    {% endif %}
+                    
+                    <hr class="my-4">
+                    
+                    <div class="event-stats">
+                        <h6 class="fw-bold mb-3">Event Details</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Status:</span>
+                            <span class="badge bg-{{ 'success' if event.status == 'active' else 'secondary' }}">
+                                {{ event.status.title() }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Created:</span>
+                            <span class="text-muted">{{ event.created_at.strftime('%b %d, %Y') }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Last Updated:</span>
+                            <span class="text-muted">{{ event.updated_at.strftime('%b %d, %Y') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if current_user.is_authenticated and current_user.id == event.organizer_id %}
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3">Event Management</h6>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-edit me-2"></i>Edit Event
+                            </a>
+                            <a href="{{ url_for('delete_event', event_id=event.id) }}" 
+                               class="btn btn-outline-danger btn-sm"
+                               onclick="return confirm('Are you sure you want to delete this event? This action cannot be undone.')">
+                                <i class="fas fa-trash me-2"></i>Delete Event
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

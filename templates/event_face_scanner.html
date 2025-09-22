@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+
+{% block title %}Face Scanner - {{ event.title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-6 fw-bold">Face Verification Scanner</h1>
+                    <p class="text-muted">{{ event.title }} - {{ event.date.strftime('%B %d, %Y') }}</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('face_verification_scanner') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Scanner
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Scanner Interface -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-camera me-2"></i>Face Verification Scanner
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- QR Code Scanner -->
+                    <div class="scanner-section mb-4">
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-qrcode me-2"></i>Step 1: Scan QR Code
+                        </h6>
+                        <div class="qr-scanner-container">
+                            <div id="qr-scanner-placeholder" class="scanner-placeholder">
+                                <i class="fas fa-qrcode fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">QR Code Scanner</h5>
+                                <p class="text-muted">Click "Start QR Scanner" to begin scanning QR codes</p>
+                                <button id="start-qr-scanner" class="btn btn-primary">
+                                    <i class="fas fa-play me-2"></i>Start QR Scanner
+                                </button>
+                            </div>
+                            <video id="qr-video" width="100%" height="300" style="display: none;"></video>
+                            <canvas id="qr-canvas" width="640" height="480" style="display: none;"></canvas>
+                        </div>
+                        
+                        <!-- Manual QR Input -->
+                        <div class="mt-3">
+                            <label for="manual-qr-input" class="form-label">Or enter QR code data manually:</label>
+                            <div class="input-group">
+                                <textarea class="form-control" id="manual-qr-input" rows="2" 
+                                          placeholder="Paste QR code data here..."></textarea>
+                                <button class="btn btn-outline-primary" id="process-manual-qr">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Face Capture -->
+                    <div class="scanner-section mb-4">
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-camera me-2"></i>Step 2: Capture Face
+                        </h6>
+                        <div class="face-capture-container">
+                            <div id="face-capture-placeholder" class="scanner-placeholder">
+                                <i class="fas fa-camera fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Face Capture</h5>
+                                <p class="text-muted">Click "Start Face Capture" to begin face verification</p>
+                                <button id="start-face-capture" class="btn btn-success" disabled>
+                                    <i class="fas fa-camera me-2"></i>Start Face Capture
+                                </button>
+                            </div>
+                            <video id="face-video" width="100%" height="300" style="display: none;"></video>
+                            <canvas id="face-canvas" width="640" height="480" style="display: none;"></canvas>
+                        </div>
+                        
+                        <!-- Capture Button -->
+                        <div class="text-center mt-3" id="capture-button-container" style="display: none;">
+                            <button id="capture-face" class="btn btn-warning btn-lg">
+                                <i class="fas fa-camera me-2"></i>Capture Face
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Panel -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Verification Results
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="verification-results">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-user-check fa-2x mb-3"></i>
+                            <p>Scan QR code and capture face to see results</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Event Stats -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Event Statistics
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h5 class="text-primary">{{ event.registrations|length }}</h5>
+                            <small class="text-muted">Registered</small>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="text-success" id="verified-count">0</h5>
+                            <small class="text-muted">Verified</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle me-2"></i>Entry Granted ✅
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="success-content">
+                    <!-- Success content will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Continue Scanning</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-times-circle me-2"></i>Entry Denied ❌
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="error-content">
+                    <!-- Error content will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Try Again</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+let qrVideo, qrCanvas, qrContext;
+let faceVideo, faceCanvas, faceContext;
+let qrScanning = false;
+let faceCapturing = false;
+let qrStream = null;
+let faceStream = null;
+let currentQRData = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    qrVideo = document.getElementById('qr-video');
+    qrCanvas = document.getElementById('qr-canvas');
+    qrContext = qrCanvas.getContext('2d');
+    
+    faceVideo = document.getElementById('face-video');
+    faceCanvas = document.getElementById('face-canvas');
+    faceContext = faceCanvas.getContext('2d');
+    
+    // QR Scanner controls
+    document.getElementById('start-qr-scanner').addEventListener('click', startQRScanner);
+    document.getElementById('process-manual-qr').addEventListener('click', processManualQR);
+    
+    // Face capture controls
+    document.getElementById('start-face-capture').addEventListener('click', startFaceCapture);
+    document.getElementById('capture-face').addEventListener('click', captureFace);
+});
+
+function startQRScanner() {
+    if (qrScanning) {
+        stopQRScanner();
+        return;
+    }
+    
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(function(mediaStream) {
+            qrStream = mediaStream;
+            qrVideo.srcObject = stream;
+            qrVideo.play();
+            
+            document.getElementById('qr-scanner-placeholder').style.display = 'none';
+            qrVideo.style.display = 'block';
+            document.getElementById('start-qr-scanner').innerHTML = '<i class="fas fa-stop me-2"></i>Stop QR Scanner';
+            
+            qrScanning = true;
+            scanQRFrame();
+        })
+        .catch(function(err) {
+            console.error('Error accessing camera:', err);
+            alert('Error accessing camera. Please ensure you have granted camera permissions.');
+        });
+}
+
+function stopQRScanner() {
+    if (qrStream) {
+        qrStream.getTracks().forEach(track => track.stop());
+        qrStream = null;
+    }
+    
+    qrScanning = false;
+    qrVideo.style.display = 'none';
+    document.getElementById('qr-scanner-placeholder').style.display = 'block';
+    document.getElementById('start-qr-scanner').innerHTML = '<i class="fas fa-play me-2"></i>Start QR Scanner';
+}
+
+function scanQRFrame() {
+    if (!qrScanning) return;
+    
+    if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
+        qrCanvas.height = qrVideo.videoHeight;
+        qrCanvas.width = qrVideo.videoWidth;
+        qrContext.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
+        
+        const imageData = qrContext.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        
+        if (code) {
+            processQRCode(code.data);
+            return;
+        }
+    }
+    
+    requestAnimationFrame(scanQRFrame);
+}
+
+function processManualQR() {
+    const qrData = document.getElementById('manual-qr-input').value.trim();
+    if (qrData) {
+        processQRCode(qrData);
+        document.getElementById('manual-qr-input').value = '';
+    }
+}
+
+function processQRCode(qrData) {
+    // Stop QR scanning
+    if (qrScanning) {
+        stopQRScanner();
+    }
+    
+    currentQRData = qrData;
+    
+    // Enable face capture
+    document.getElementById('start-face-capture').disabled = false;
+    
+    // Show QR code info
+    try {
+        const qrInfo = JSON.parse(qrData);
+        document.getElementById('verification-results').innerHTML = `
+            <div class="alert alert-info">
+                <h6 class="alert-heading">QR Code Scanned</h6>
+                <p class="mb-1"><strong>Name:</strong> ${qrInfo.user_name}</p>
+                <p class="mb-1"><strong>Event:</strong> ${qrInfo.event_title}</p>
+                <p class="mb-0"><strong>Code:</strong> ${qrInfo.verification_code}</p>
+            </div>
+            <p class="text-muted small">Now capture the person's face for verification.</p>
+        `;
+    } catch (e) {
+        document.getElementById('verification-results').innerHTML = `
+            <div class="alert alert-warning">
+                <h6 class="alert-heading">QR Code Scanned</h6>
+                <p class="mb-0">QR code data received. Now capture face for verification.</p>
+            </div>
+        `;
+    }
+}
+
+function startFaceCapture() {
+    if (faceCapturing) {
+        stopFaceCapture();
+        return;
+    }
+    
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+        .then(function(mediaStream) {
+            faceStream = mediaStream;
+            faceVideo.srcObject = mediaStream;
+            faceVideo.play();
+            
+            document.getElementById('face-capture-placeholder').style.display = 'none';
+            faceVideo.style.display = 'block';
+            document.getElementById('capture-button-container').style.display = 'block';
+            document.getElementById('start-face-capture').innerHTML = '<i class="fas fa-stop me-2"></i>Stop Face Capture';
+            
+            faceCapturing = true;
+        })
+        .catch(function(err) {
+            console.error('Error accessing camera:', err);
+            alert('Error accessing camera. Please ensure you have granted camera permissions.');
+        });
+}
+
+function stopFaceCapture() {
+    if (faceStream) {
+        faceStream.getTracks().forEach(track => track.stop());
+        faceStream = null;
+    }
+    
+    faceCapturing = false;
+    faceVideo.style.display = 'none';
+    document.getElementById('capture-button-container').style.display = 'none';
+    document.getElementById('face-capture-placeholder').style.display = 'block';
+    document.getElementById('start-face-capture').innerHTML = '<i class="fas fa-camera me-2"></i>Start Face Capture';
+}
+
+function captureFace() {
+    if (!faceCapturing || !currentQRData) {
+        alert('Please scan QR code and start face capture first.');
+        return;
+    }
+    
+    // Capture current frame
+    faceCanvas.height = faceVideo.videoHeight;
+    faceCanvas.width = faceVideo.videoWidth;
+    faceContext.drawImage(faceVideo, 0, 0, faceCanvas.width, faceCanvas.height);
+    
+    // Convert to base64
+    const faceImageData = faceCanvas.toDataURL('image/jpeg', 0.8);
+    
+    // Show processing message
+    document.getElementById('verification-results').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Processing...</span>
+            </div>
+            <p class="text-muted">Verifying face...</p>
+        </div>
+    `;
+    
+    // Send for verification
+    fetch('/api/verify_face', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            qr_data: currentQRData,
+            face_image: faceImageData,
+            event_id: eventId,
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.is_match) {
+                showSuccessModal(data);
+                updateVerifiedCount();
+            } else {
+                showErrorModal(data);
+            }
+        } else {
+            showErrorModal(data);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showErrorModal({ error: 'Network error occurred' });
+    })
+    .finally(() => {
+        // Reset for next scan
+        currentQRData = null;
+        document.getElementById('start-face-capture').disabled = true;
+        document.getElementById('verification-results').innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-user-check fa-2x mb-3"></i>
+                <p>Scan QR code and capture face to see results</p>
+            </div>
+        `;
+    });
+}
+
+function showSuccessModal(data) {
+    const content = document.getElementById('success-content');
+    content.innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+            <h5>Entry Granted!</h5>
+            <p class="text-muted">Face verification successful</p>
+            <div class="alert alert-success">
+                <strong>Name:</strong> ${data.user_info.name}<br>
+                <strong>Event:</strong> ${data.user_info.event_title}<br>
+                <strong>Similarity:</strong> ${data.similarity}%<br>
+                <strong>Verification Code:</strong> ${data.user_info.verification_code}
+            </div>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('successModal'));
+    modal.show();
+}
+
+function showErrorModal(data) {
+    const content = document.getElementById('error-content');
+    content.innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-times-circle fa-3x text-danger mb-3"></i>
+            <h5>Entry Denied</h5>
+            <p class="text-muted">${data.error || 'Face verification failed'}</p>
+            ${data.similarity ? `
+                <div class="alert alert-warning">
+                    <strong>Similarity:</strong> ${data.similarity}%<br>
+                    <strong>Required:</strong> ${data.threshold}%
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+    modal.show();
+}
+
+function updateVerifiedCount() {
+    // This would typically fetch from an API endpoint
+    // For now, we'll increment the counter
+    const currentCount = parseInt(document.getElementById('verified-count').textContent);
+    document.getElementById('verified-count').textContent = currentCount + 1;
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (qrStream) {
+        qrStream.getTracks().forEach(track => track.stop());
+    }
+    if (faceStream) {
+        faceStream.getTracks().forEach(track => track.stop());
+    }
+});
+</script>
+
+<style>
+.scanner-section {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    margin-bottom: 20px;
+}
+
+.scanner-placeholder {
+    padding: 40px;
+    text-align: center;
+}
+
+#qr-video, #face-video {
+    border-radius: 8px;
+    background-color: #000;
+}
+
+#qr-canvas, #face-canvas {
+    display: none;
+}
+
+.modal-header.bg-success {
+    background-color: #198754 !important;
+}
+
+.modal-header.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.alert-info {
+    background-color: rgba(13, 202, 240, 0.1);
+    border-left: 4px solid #0dcaf0;
+}
+
+.alert-success {
+    background-color: rgba(25, 135, 84, 0.1);
+    border-left: 4px solid #198754;
+}
+
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-left: 4px solid #ffc107;
+}
+</style>
+{% endblock %}
+
+
+
+
