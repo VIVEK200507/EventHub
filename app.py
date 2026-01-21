@@ -66,7 +66,7 @@ class User(UserMixin, db.Model):
         return self.role == 'checker'
     
     def can_scan_qr(self):
-        return self.role in ['admin', 'organizer', 'checker']
+        return self.role in ['admin', 'organizer', 'checker']or self.is_organizer
     
     def can_manage_events(self):
         return self.role in ['admin', 'organizer']
